@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="icon" href="/images/logo.jpg" type="image/jpg">
+
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css'/>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/material-components-web/4.0.0/material-components-web.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.1/css/bootstrap.min.css"
+          integrity="sha512-Ez0cGzNzHR1tYAv56860NLspgUGuQw16GiOOp/I2LuTmpSK9xDXlgJz3XN4cnpXWDmkNBKXR/VDMTCnAaEooxA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+          integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.7.0/css/buttons.dataTables.min.css">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+            integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"
+            integrity="sha512-bZS47S7sPOxkjU/4Bt0zrhEtWx0y0CRkhEp8IckzK+ltifIIE9EMIMTuT/mEzoIMewUINruDBIR/jJnbguonqQ=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js"
+            integrity="sha512-BkpSL20WETFylMrcirBahHfSnY++H2O1W+UnEEO4yNIl+jI2+zowyoGJpbtk6bx97fBXf++WJHSSK2MV4ghPcg=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap5.min.js"></script>
+
+    <script src="https://cdn.datatables.net/buttons/1.7.0/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.colVis.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"
+            integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            color: #fff;
+            background-color: rgb(44, 47, 51);
+            font-family: 'Roboto', sans-serif !important;
+        }
+
+        table * {
+            color: #ffffff;
+        }
+
+        td {
+            white-space: normal;
+        }
+    </style>
+</head>
+<body>
+<div class="row">
+    <div class="col-4 text-end">
+        <h1><%= title %></h1>
+        <h2>Hello <span id="displayName"></span></h2>
+        <button id="refresh_friends" type="button" class="btn btn-outline-primary">
+            <i class="fas fa-sync me-1"></i>
+            Refresh Friend List
+        </button>
+    </div>
+    <div class="col-4 text-center">
+        <img id="avatar" class="rounded" src="" alt=""><br>
+    </div>
+    <div class="col-4">
+        <label for="cookie">
+            VRC Cookie <b>(Needs "apiKey" and "auth")</b>
+            <span class="d-inline-block ms-2 form-switch">
+                <input class="form-check-input" type="checkbox" id="toggle_cookie_textarea">
+            </span>
+        </label>
+        <br>
+        <textarea id="cookie" name="cookie" class="form-control d-none mt-3" cols="70" rows="3"></textarea>
+    </div>
+</div>
+
+<br>
+<table id="myTable" class="table table-striped display compact">
+    <thead>
+    <tr>
+        <th>World</th>
+        <th>Avatar</th>
+        <th>Display Name<br>Username</th>
+        <th>State</th>
+        <th>Status</th>
+        <th>Rank</th>
+        <th>Tags</th>
+        <th>Tags Count</th>
+        <th>Bio</th>
+        <th>Bio Links</th>
+        <th>Status Description</th>
+        <th>Last Platform</th>
+        <th>Join Date</th>
+        <th>Last Login</th>
+    </tr>
+    </thead>
+</table>
+
+<div class="made_with position-fixed" style="left: 10px; bottom: 10px;">
+    Made with <i class="fa fa-heart pulse"></i> in <a href="https://github.com/ChxGuillaume" target="_blank">ChxGuillaume</a>
+</div>
+
+<script>
+    jQuery.fn.dataTableExt.oSort['custom_power_sort-asc'] = (a, b) => getDataPowerValue(b) - getDataPowerValue(a);
+    jQuery.fn.dataTableExt.oSort['custom_power_sort-desc'] = (a, b) => getDataPowerValue(a) - getDataPowerValue(b);
+
+    function getDataPowerValue(data) {
+        return parseInt(data.match(/data-power="([0-9]*)"/)[1]);
+    }
+
+    const datatable = $('#myTable').DataTable({
+        dom: 'Bfrtip',
+        autoWidth: true,
+        stateSave: true,
+        scrollY: '60vh',
+        order: [[3, 'asc']],
+        aoColumns: [
+            {},
+            {},
+            {},
+            {sType: 'custom_power_sort'},
+            {sType: 'custom_power_sort'},
+            {sType: 'custom_power_sort'},
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        ],
+        columnDefs: [
+            {
+                targets: 1,
+                className: 'noVis'
+            }
+        ],
+        buttons: [
+            {
+                extend: 'colvis',
+                columns: ':not(.noVis)',
+                className: 'btn btn-outline-primary'
+            },
+            {
+                extend: 'pageLength',
+                columns: ':not(.noVis)',
+                className: 'btn btn-outline-primary'
+            }
+        ],
+        lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]]
+    });
+
+    const cookieTextareaEl = $('#cookie');
+    let userInfos = {};
+    let friends = [];
+
+    cookieTextareaEl.val(localStorage.getItem('cookie'))
+
+    cookieTextareaEl.on('input', el => {
+        localStorage.setItem('cookie', el.target.value)
+    })
+
+    $('#toggle_cookie_textarea').on('change', data => cookieTextareaEl.toggleClass('d-none', !data.target.checked));
+
+    $('#refresh_friends').on('click', () => {
+        getFriends();
+    });
+
+    axios
+        .post('/vrc_infos', {cookie: cookieTextareaEl.val()})
+        .then(({data}) => {
+            $('#displayName').text(data.userInfos.displayName)
+            $('#avatar').attr('src', data.userInfos.currentAvatarThumbnailImageUrl)
+            userInfos = data.userInfos;
+
+            getFriends();
+        })
+
+    function getFriends() {
+        axios
+            .post('/vrc_infos/friends', {cookie: cookieTextareaEl.val(), friends: userInfos.friends})
+            .then(({data}) => {
+                friends = data;
+
+                datatable.clear();
+
+                data.friends.forEach(friend => {
+                    let worldImg;
+                    let worldName;
+                    switch (friend.worldId) {
+                        case '':
+                        case 'offline':
+                            break;
+                        case 'private':
+                            worldImg = 'https://assets.vrchat.com/www/images/default_private_image.png';
+                            worldName = 'private';
+                            break;
+                        default:
+                            const world = data.worlds.find(e => e.id === friend.worldId);
+                            worldImg = world.thumbnailImageUrl
+                            worldName = world.name;
+                    }
+                    const worldImgEl = worldImg ? `<img class="rounded" height="128px" src="${worldImg}" alt="World" title="${worldName}">` : '';
+
+                    const avatarImgEl = getAvatarImgEl(friend);
+                    const stateLabel = getStateLabel(friend.state);
+                    const statusLabel = getStatusLabel(friend.status);
+                    const rankLabel = getRankLabel(friend.tags);
+
+                    const bioLinks = friend.bioLinks.map(link => {
+                        const shortLink = link.match(/(http|https):\/\/.*?\//g)
+                        if (shortLink) {
+                            return `<a target="_blank" href="${link}" title="${link}">${shortLink[0]}</a>`
+                        } else return '';
+                    });
+
+                    datatable.row.add([
+                        worldImgEl,
+                        avatarImgEl,
+                        `${friend.displayName}<br>${friend.username}`,
+                        stateLabel,
+                        statusLabel,
+                        rankLabel,
+                        `<pre>${friend.tags.sort().join('\n')}</pre>`,
+                        friend.tags.length,
+                        friend.bio,
+                        `<pre>${bioLinks.join('\n')}</pre>`,
+                        friend.statusDescription,
+                        friend.last_platform,
+                        `<pre>${friend.date_joined}</pre>`,
+                        `<pre>${moment(friend.last_login).format('YYYY/MM/DD HH:mm:ss')}</pre>`
+                    ])
+                })
+
+                datatable.draw();
+            })
+    }
+
+    function getAvatarImgEl(friend) {
+        const badges = [];
+        if (friend.tags.includes('system_supporter')) badges.push('vrc_plus');
+        if (friend.tags.includes('system_early_adopter')) badges.push('early_adopter');
+
+        return `<div class="text-center ${badges.join(' ')}"><img class="rounded" height="128px" src="${friend.currentAvatarThumbnailImageUrl}" alt="Avatar"/></div>`;
+    }
+
+    function getStateLabel(state) {
+        switch (state) {
+            case 'online':
+                return `<span class="badge rounded-pill bg-success" data-power="4">Online</span>`
+            case 'active':
+                return `<span class="badge rounded-pill bg-info" data-power="3">Active</span>`
+            case 'offline':
+                return `<span class="badge rounded-pill bg-danger" data-power="2">Offline</span>`
+            default:
+                return `<span class="badge rounded-pill bg-secondary" data-power="1">${status}</span>`
+        }
+    }
+
+    function getStatusLabel(status) {
+        switch (status) {
+            case 'join me':
+                return `<span class="badge rounded-pill" data-power="5" style="background: #42caff;">Join Me</span>`
+            case 'active':
+                return `<span class="badge rounded-pill" data-power="4" style="background: #51e57e;">Active</span>`
+            case 'ask me':
+                return `<span class="badge rounded-pill" data-power="3" style="background: #e88134;">Ask Me</span>`
+            case 'busy':
+                return `<span class="badge rounded-pill" data-power="2" style="background: #5b0b0b;">Busy</span>`
+            default:
+                return `<span class="badge rounded-pill" data-power="1" style="background: black;">${status}</span>`
+        }
+    }
+
+    function getRankLabel(tags) {
+        if (tags.includes('system_legend') && tags.includes('system_trust_legend') && tags.includes('system_trust_trusted'))
+            return `<span class="badge rounded-pill" style="background: #FF69B4" data-power="7">Legend</span>`;
+        else if (tags.includes('system_trust_legend') && tags.includes('system_trust_trusted'))
+            return `<span class="badge rounded-pill" style="background: #5D88BB" data-power="6">Veteran</span>`;
+        else if (tags.includes('system_trust_veteran') && tags.includes('system_trust_trusted'))
+            return `<span class="badge rounded-pill" style="background: #8143E6" data-power="5">Trusted</span>`;
+        else if (tags.includes('system_trust_trusted'))
+            return `<span class="badge rounded-pill" style="background: #FF7B42" data-power="4">Known</span>`;
+        else if (tags.includes('system_trust_known'))
+            return `<span class="badge rounded-pill" style="background: #2BCF5C" data-power="3">User</span>`;
+        else if (tags.includes('system_trust_basic'))
+            return `<span class="badge rounded-pill" style="background: #1778FF" data-power="2">New User</span>`;
+        else
+            return `<span class="badge rounded-pill" style="background: #CCCCCC" data-power="1">Visitor</span>`
+    }
+</script>
+</body>
+</html>

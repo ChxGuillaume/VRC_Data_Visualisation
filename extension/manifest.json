@@ -1,0 +1,31 @@
+{
+  "name": "VRChat - Get Cookie",
+  "description": "Get cookies for data mining.",
+  "version": "0.0.1",
+  "manifest_version": 3,
+  "icons": {
+    "16": "images/logo16.jpg",
+    "48": "images/logo48.jpg",
+    "128": "images/logo128.jpg"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": [
+    "tabs",
+    "cookies",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://vrchat.com/"
+  ],
+  "action": {
+    "default_icon": {
+      "16": "images/icon16.png",
+      "24": "images/icon24.png",
+      "32": "images/icon32.png"
+    },
+    "default_title": "Click Me"
+  }
+}
