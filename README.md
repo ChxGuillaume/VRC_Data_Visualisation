@@ -1,6 +1,6 @@
 # 📊 VRC Data Visualisation
 
-# ❔ Infos
+## ❔ Infos
 
 This tool can help you see more VRC data in a glance and at the click of a button with the extension!
 
