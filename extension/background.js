@@ -23,10 +23,10 @@ try {
                     target: {tabId: tab.id},
                     function: getCookies
                 }, (data) => {
-                    const cookies = data[0].result.match(/(apiKey=.*?;)|(auth=.*?;)/gm).join(' ');
+                    const cookies = data[0].result.match(/(apiKey=.*?;)|(auth=.*?;)/gm);
 
                     if (cookies.length === 2) {
-                        chrome.tabs.create({url: `${websiteUrl}setCookie?cookie=${encodeURIComponent(cookies)}`})
+                        chrome.tabs.create({url: `${websiteUrl}setCookie?cookie=${encodeURIComponent(cookies.join(' '))}`})
                     }
                 })
             }
