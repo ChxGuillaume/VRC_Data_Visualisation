@@ -3,8 +3,8 @@ try {
 
     setIcon(true);
 
-    chrome.tabs.onActivated.addListener((tab) => {
-        chrome.tabs.get(tab.tabId, (data) => setIcon(!isLoggedUrl(data.url)));
+    chrome.tabs.onActivated.addListener((activeInfo) => {
+        checkTabForIcon(activeInfo.tabId)
     })
 
     chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
@@ -34,6 +34,16 @@ try {
     });
 } catch (e) {
     console.error(e)
+}
+
+function checkTabForIcon(tabId) {
+    // Timeout in case of tabs dragging throw
+    setTimeout(() => {
+        chrome.tabs.get(tabId, (tab) => {
+            if (tab) setIcon(!isLoggedUrl(tab.url));
+            else checkTabForIcon(tabId);
+        });
+    }, 100);
 }
 
 function getCookies() {
